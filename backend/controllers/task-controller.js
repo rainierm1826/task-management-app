@@ -133,12 +133,18 @@ export const deleteTask = async (request, response) => {
   try {
     const id = Number(request.params.id);
 
-    const existingTask = prisma.task.findUnique({
+    if (Number.isNaN(id)) {
+      return response.status(400).json({
+        message: "Invalid Task ID",
+      });
+    }
+
+    const existingTask = await prisma.task.findUnique({
       where: { id },
     });
 
     if (!existingTask) {
-      response.status(404).json({
+      return response.status(404).json({
         message: "Task does not exist",
       });
     }

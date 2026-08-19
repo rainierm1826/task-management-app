@@ -1,20 +1,22 @@
 import { useState } from "react";
-import { Check, Circle, Pencil, Save, X } from "lucide-react";
-import { updateTask } from "../api/task-api";
+import { Check, Circle, Pencil, Save, Trash2, X } from "lucide-react";
+import { deleteTask, updateTask } from "../api/task-api";
 import type { Task } from "../types/task-types";
 
 interface TaskCardProps {
   task: Task;
   onUpdated: (task: Task) => void;
+  onDeleted: (id: number) => void;
 }
 
-const TaskCard = ({ task, onUpdated }: TaskCardProps) => {
+const TaskCard = ({ task, onUpdated, onDeleted }: TaskCardProps) => {
   const { id, title, description, completed } = task;
   const [editing, setEditing] = useState(false);
   const [editedTitle, setEditedTitle] = useState(title);
   const [editedDescription, setEditedDescription] = useState(description || "");
   const [editedCompleted, setEditedCompleted] = useState(completed);
   const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const startEditing = () => {
@@ -51,6 +53,24 @@ const TaskCard = ({ task, onUpdated }: TaskCardProps) => {
       setError("Couldn't update task. Try again.");
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!window.confirm("Delete this task?")) {
+      return;
+    }
+
+    setDeleting(true);
+    setError(null);
+    try {
+      await deleteTask(id);
+      onDeleted(id);
+    } catch (err) {
+      console.error(err);
+      setError("Couldn't delete task. Try again.");
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -95,7 +115,7 @@ const TaskCard = ({ task, onUpdated }: TaskCardProps) => {
               <button
                 type="button"
                 onClick={cancelEditing}
-                disabled={saving}
+                disabled={saving || deleting}
                 aria-label="Cancel editing"
                 className="rounded p-1.5 text-muted-foreground hover:text-foreground disabled:opacity-50"
               >
@@ -103,7 +123,7 @@ const TaskCard = ({ task, onUpdated }: TaskCardProps) => {
               </button>
               <button
                 type="submit"
-                disabled={saving}
+                disabled={saving || deleting}
                 aria-label="Save task changes"
                 className="rounded p-1.5 text-foreground hover:bg-muted disabled:opacity-50"
               >
@@ -177,6 +197,15 @@ const TaskCard = ({ task, onUpdated }: TaskCardProps) => {
             className="shrink-0 rounded p-1.5 text-muted-foreground opacity-0 transition-opacity hover:bg-muted hover:text-foreground group-hover:opacity-100 focus:opacity-100"
           >
             <Pencil className="h-4 w-4" />
+          </button>
+          <button
+            type="button"
+            onClick={handleDelete}
+            disabled={deleting}
+            aria-label="Delete task"
+            className="shrink-0 rounded p-1.5 text-muted-foreground opacity-0 transition-opacity hover:bg-destructive/10 hover:text-destructive disabled:opacity-50 group-hover:opacity-100 focus:opacity-100"
+          >
+            <Trash2 className="h-4 w-4" />
           </button>
         </>
       )}

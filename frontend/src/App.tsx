@@ -45,6 +45,10 @@ function App() {
     );
   };
 
+  const handleTaskDeleted = (taskId: number) => {
+    setTasks((prev) => prev.filter((task) => task.id !== taskId));
+  };
+
   const statusOptions: { label: string; value: StatusFilter }[] = [
     { label: "All", value: "" },
     { label: "Active", value: "incomplete" },
@@ -131,7 +135,12 @@ function App() {
       ) : (
         <div className="flex flex-col gap-2">
           {tasks.map((task) => (
-            <TaskCard key={task.id} task={task} onUpdated={handleTaskUpdated} />
+            <TaskCard
+              key={task.id}
+              task={task}
+              onUpdated={handleTaskUpdated}
+              onDeleted={handleTaskDeleted}
+            />
           ))}
         </div>
       )}
