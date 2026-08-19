@@ -9,6 +9,7 @@ A full-stack task management application built with React, TypeScript, Vite, Exp
 - Filter tasks by active or completed status
 - Edit task title, description, and status
 - Mark tasks complete or active
+- Delete tasks
 
 ## Requirements
 
